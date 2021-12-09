@@ -1,17 +1,10 @@
 const express = require("express");
-const mongoose = require("mongoose");
-
 const app = express();
+const cors = require("cors");
+const mongo = require("./mongo");
+mongo();
 
 app.use(express.json());
-
-mongoose
-  .connect(
-    "mongodb+srv://Lancos:NbUU1HRn8X560CSO@cluster0.vi1wq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
-  .then(() => console.log("Connexion à MongoDB réussie !"))
-  .catch(() => console.log("Connexion à MongoDB échouée !"));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");

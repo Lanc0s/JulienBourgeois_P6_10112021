@@ -1,17 +1,6 @@
-const express = require("express");
-const mongoose = require("mongoose");
-
+const mongo = require("./mongo");
 const app = express();
-
-app.use(express.json());
-
-mongoose
-  .connect(
-    "mongodb+srv://Lancos:NbUU1HRn8X560CSO@cluster0.vi1wq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
-  .then(() => console.log("Connexion à MongoDB réussie !"))
-  .catch(() => console.log("Connexion à MongoDB échouée !"));
+const sauceSchema = require("./database/models/sauce");
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -26,7 +15,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors());
 app.get("/api/sauces/", (req, res, next) => {
   //
 });
