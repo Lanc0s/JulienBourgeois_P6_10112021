@@ -4,6 +4,8 @@ const cors = require("cors");
 const mongo = require("./mongo");
 mongo();
 
+const sauceRoutes = require("./routes/sauce");
+
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -21,12 +23,5 @@ app.use((req, res, next) => {
 
 app.use(cors());
 
-app.post("/api/auth/signup", (req, res, next) => {
-  //
-});
-
-app.post("/api/auth/login", (req, res, next) => {
-  //
-});
-
+app.use("/api/sauce", sauceRoutes);
 module.exports = app;
