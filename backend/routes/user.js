@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const authSchema = require("../database/models/user");
+const userSchema = require("../database/models/user");
 
 app.post("/api/auth/signup", (req, res, next) => {
   //
