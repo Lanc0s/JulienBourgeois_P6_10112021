@@ -1,11 +1,13 @@
 const mongoose = require("mongoose");
 
+require("dotenv").config();
+
 module.exports = () => {
   mongoose
-    .connect(
-      "mongodb+srv://Lancos:NbUU1HRn8X560CSO@cluster0.vi1wq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-      { useNewUrlParser: true, useUnifiedTopology: true }
-    )
+    .connect(`${process.env.DB_CONNECTION_STRING}`, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
     .then(() => console.log("Connexion à MongoDB réussie !"))
-    .catch(() => console.log("Connexion à MongoDB échouée !"));
+    .catch(() => console.log("FATAL : Connexion à MongoDB échouée !"));
 };
