@@ -5,6 +5,7 @@ const mongo = require("./mongo");
 mongo();
 
 const sauceRoutes = require("./routes/sauce");
+const userRoutes = require("./routes/user");
 
 app.use(express.json());
 
@@ -24,4 +25,6 @@ app.use((req, res, next) => {
 app.use(cors());
 
 app.use("/api/sauce", sauceRoutes);
+app.use("/api/auth", userRoutes);
+
 module.exports = app;

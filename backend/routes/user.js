@@ -1,12 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-const userSchema = require("../database/models/user");
+const userCtrl = require("../controllers/user");
 
-app.post("/api/auth/signup", (req, res, next) => {
-  //
-});
+router.post("/signup", userCtrl.signup);
 
-app.post("/api/auth/login", (req, res, next) => {
-  //
-});
+router.post("/login", userCtrl.login);
+
+module.exports = router;
