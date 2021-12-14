@@ -59,7 +59,7 @@ exports.getOneSauce = (req, res, next) => {
 exports.getAllSauces = (req, res, next) => {
   sauceSchema
     .find()
-    .then((sauce) => res.status(200).json())
+    .then((sauces) => res.status(200).json(sauces))
     .catch((error) => res.status(400).json({ error }));
 };
 
