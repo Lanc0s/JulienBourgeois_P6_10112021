@@ -3,6 +3,7 @@ const app = express();
 const cors = require("cors");
 const mongo = require("./mongo");
 mongo();
+const path = require("path");
 
 const sauceRoutes = require("./routes/sauce");
 const userRoutes = require("./routes/user");
@@ -23,6 +24,8 @@ app.use((req, res, next) => {
 });
 
 app.use(cors());
+
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use("/api/sauce", sauceRoutes);
 app.use("/api/auth", userRoutes);
