@@ -17,17 +17,16 @@ exports.createSauce = (req, res, next) => {
 exports.modifySauce = (req, res, next) => {
   const sauceObject = req.file
     ? {
+        // ??? liquide ancienne image ???
         ...JSON.parse(req.body.sauce),
+        // ??? liquide ancienne image ???
         imageUrl: `${req.protocol}://${req.get("host")}/images/${
           req.file.filename
         }`,
       }
     : { ...req.body };
   sauceSchema
-    .updateOne(
-      { _id: req.params.id },
-      { ...sauceObject, _id: require.params.id }
-    )
+    .updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
     .then(() => res.status(200).json({ message: "Sauce modifiée !" }))
     .catch(() => res.status(400).json({ error }));
 };
@@ -63,18 +62,50 @@ exports.getAllSauces = (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
-/////////////////////////////
-//Je suis sûr de rien ici
-////////////////////////////
-exports.likeSauce = (req, res, next) => {
-  sauceSchema.findById(req.params.id, function (error, theUser) {
-    if (error) {
-      console.log(error);
-    } else {
-      theUser.likes += 1;
-      theUser.save();
-      console.log(theUser.likes);
-      res.send({ likeCount: theUser.likes });
-    }
-  });
+exports.feedBackSauce = async (req, res, next) => {
+  const { userId, like } = req.body;
+  const { id } = req.params;
+
+  switch (like) {
+    case 1:
+      return sauceSchema
+        .updateOne(
+          { _id: id },
+          { $push: { usersLiked: userId }, $inc: { likes: 1 } }
+        )
+        .then(() => res.status(200).json({ messge: "Liké !" }))
+        .catch((error) => res.status(400).json({ error }));
+    case 0:
+      const sauce = await sauceSchema.findOne({ _id: id });
+      if (sauce.usersLiked.includes(userId)) {
+        return sauceSchema
+          .updateOne(
+            { _id: id },
+            { $pull: { usersLiked: userId }, $inc: { likes: -1 } }
+          )
+          .then(() => res.status(200).json({ messages: "Unliked" }))
+          .catch((error) => res.status(400).json({ error }));
+      } else if (sauce.usersDisliked.includes(userId)) {
+        return sauceSchema
+          .updateOne(
+            { _id: id },
+            { $pull: { usersDisliked: userId }, $inc: { dislikes: -1 } }
+          )
+          .then(() => res.status(200).json({ message: "Disliked" }))
+          .catch((error) => res.status(400).json({ error }));
+      } else {
+        return res
+          .status(400)
+          .json({ error: "The user did not five a feedback yet" });
+      }
+
+    case -1:
+      return sauceSchema
+        .updateOne(
+          { _id: id },
+          { $push: { usersDisliked: userId }, $inc: { dislikes: 1 } }
+        )
+        .then(() => res.status(200).json({ message: "Undisliked" }))
+        .catch((error) => res.status(400).json(error));
+  }
 };
