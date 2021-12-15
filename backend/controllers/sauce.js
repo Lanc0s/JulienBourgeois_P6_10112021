@@ -1,4 +1,5 @@
 const sauceSchema = require("../database/models/sauce");
+const fs = require("fs");
 
 exports.createSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce);
@@ -19,7 +20,6 @@ exports.modifySauce = (req, res, next) => {
     ? {
         // ??? liquide ancienne image ???
         ...JSON.parse(req.body.sauce),
-        // ??? liquide ancienne image ???
         imageUrl: `${req.protocol}://${req.get("host")}/images/${
           req.file.filename
         }`,
@@ -33,18 +33,13 @@ exports.modifySauce = (req, res, next) => {
 
 exports.deleteSauce = (req, res, next) => {
   sauceSchema.findOne({ _id: req.params.id }).then((sauce) => {
-    if (!sauce) {
-      return res.status(404).json({
-        error: new Error("Objet non trouvé !"),
-      });
-    }
-    if (sauce.userId !== req.auth.userId) {
-      res.status(401).json({ error: new Error("Requête non authorisée !") });
-    }
-    sauceSchema
-      .deleteOne({ _id: req.params.id })
-      .then(() => res.status(200).json({ message: "Sauce supprimée !" }))
-      .catch((error) => res.status(400).json({ error }));
+    const filename = sauce.imageUrl.split("/images/")[1];
+    fs.unlink(`images/${filename}`, () => {
+      sauceSchema
+        .deleteOne({ _id: req.params.id })
+        .then(() => res.status(200).json({ message: "Sauce supprimée !" }))
+        .catch((error) => res.status(400).json({ error }));
+    });
   });
 };
 
