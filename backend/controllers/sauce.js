@@ -16,9 +16,9 @@ exports.createSauce = (req, res, next) => {
 };
 
 exports.modifySauce = (req, res, next) => {
+  //là on test que req.file is true, si oui première {}, si non {}
   const sauceObject = req.file
     ? {
-        // ??? liquide ancienne image ???
         ...JSON.parse(req.body.sauce),
         imageUrl: `${req.protocol}://${req.get("host")}/images/${
           req.file.filename
@@ -26,9 +26,29 @@ exports.modifySauce = (req, res, next) => {
       }
     : { ...req.body };
   sauceSchema
-    .updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-    .then(() => res.status(200).json({ message: "Sauce modifiée !" }))
-    .catch(() => res.status(400).json({ error }));
+    .findOne({ _id: req.params.id })
+    .then((sauce) => {
+      if (!sauce) {
+        res.status(404).json({ error: new Error("No such sauce!") });
+      }
+      if (sauce.userId !== req.auth.userId) {
+        res.status(400).json({ error: new Error("Unauthorized request!") });
+      }
+      const filename = sauce.imageUrl.split("/images/")[1];
+      //l'image a changée, il faut donc suprimer l'ancienne et unlink n'appelle pas de funtion callback
+      //req.file est défini si l'image a changée
+      if (req.file && filename !== req.file.filename) {
+        fs.unlink(`images/${filename}`, () => {});
+      }
+      sauceSchema
+        .updateOne(
+          { _id: req.params.id },
+          { ...sauceObject, _id: req.params.id }
+        )
+        .then(() => res.status(200).json({ message: "Objet modifié !" }))
+        .catch((error) => res.status(400).json({ error }));
+    })
+    .catch((error) => res.status(500).json({ error }));
 };
 
 exports.deleteSauce = (req, res, next) => {
@@ -78,7 +98,7 @@ exports.feedBackSauce = async (req, res, next) => {
             { _id: id },
             { $pull: { usersLiked: userId }, $inc: { likes: -1 } }
           )
-          .then(() => res.status(200).json({ messages: "Unliked" }))
+          .then(() => res.status(200).json({ messages: "Unliked !" }))
           .catch((error) => res.status(400).json({ error }));
       } else if (sauce.usersDisliked.includes(userId)) {
         return sauceSchema
@@ -86,7 +106,7 @@ exports.feedBackSauce = async (req, res, next) => {
             { _id: id },
             { $pull: { usersDisliked: userId }, $inc: { dislikes: -1 } }
           )
-          .then(() => res.status(200).json({ message: "Disliked" }))
+          .then(() => res.status(200).json({ message: "Undisliked !" }))
           .catch((error) => res.status(400).json({ error }));
       } else {
         return res
@@ -100,7 +120,7 @@ exports.feedBackSauce = async (req, res, next) => {
           { _id: id },
           { $push: { usersDisliked: userId }, $inc: { dislikes: 1 } }
         )
-        .then(() => res.status(200).json({ message: "Undisliked" }))
+        .then(() => res.status(200).json({ message: "Disliked !" }))
         .catch((error) => res.status(400).json(error));
   }
 };
