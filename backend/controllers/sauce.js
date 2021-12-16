@@ -86,9 +86,10 @@ exports.feedBackSauce = async (req, res, next) => {
       return sauceSchema
         .updateOne(
           { _id: id },
+          //mongoose fonction  https://docs.mongodb.com/manual/reference/operator/update/push/
           { $push: { usersLiked: userId }, $inc: { likes: 1 } }
         )
-        .then(() => res.status(200).json({ messge: "Liké !" }))
+        .then(() => res.status(200).json({ message: "Liké !" }))
         .catch((error) => res.status(400).json({ error }));
     case 0:
       const sauce = await sauceSchema.findOne({ _id: id });
@@ -122,5 +123,7 @@ exports.feedBackSauce = async (req, res, next) => {
         )
         .then(() => res.status(200).json({ message: "Disliked !" }))
         .catch((error) => res.status(400).json(error));
+    default:
+      res.status(400).json({ message: "Mayday" });
   }
 };
